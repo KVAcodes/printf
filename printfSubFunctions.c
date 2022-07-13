@@ -1,101 +1,122 @@
 #include "main.h"
-
+#include <unistd.h>
+#include <stdio.h>
 /**
- * print_char - prints a char to stdout
- * @c: character argument
+ * print_char - writes the character c to stdout
+ * @arg: argument
  *
- * Return: The no characters printed
+ * Return: On success 1.
+ * On error, -1 is returned, and errno is set appropriately.
  */
-int print_char(va_list c)
+int print_char(va_list arg)
 {
-	char tmpchar;
-	int moreCharsPrinted;
-
-	moreCharsPrinted = 0;
-	tmpchar = va_arg(c, int);
-	_putchar(tmpchar);
-	moreCharsPrinted++;
-	return (moreCharsPrinted);
+		return (_putchar(va_arg(arg, int)));
 }
 
 /**
- * print_string - prints a string to stdout
- * @s: string argument
- *
- * Return: The no of characters printed
+ * print_int - prints an integer.
+ * @arg: argument
+ * Return: 0
  */
-int print_string(va_list s)
+
+int print_int(va_list arg)
 {
-	int var1;
+	unsigned int divisor = 1, i, resp, charPrinted = 0;
+	int n = va_arg(arg, int);
 
-	char *str = va_arg(s, char *);
-
-	for (var1 = 0; str[var1]; var1++)
-	{
-		_putchar(str[var1]);
-	}
-	return (var1);
-}
-
-/**
- * print_int - prints an integer
- * @id: an integer argument
- * Return: The no of characters printed to stdout
- * or the no of digits the integer is made of
- */
-int print_int(va_list id)
-{
-	int num, order, digit, moreCharsPrinted;
-
-	moreCharsPrinted = 0;
-
-	num = va_arg(id, int);
-	if (num < 0)
+	if (n < 0)
 	{
 		_putchar('-');
-		num = num * -1;
-		moreCharsPrinted++;
+		charPrinted++;
+		n *= -1;
 	}
-	for (order = 1; num / order != 0; order *= 10)
+
+	for (i = 0; n / divisor > 9; i++, divisor *= 10)
 	{
 	}
-	for (order /= 10; order > 0; order /= 10)
+	for (; divisor >= 1; n %= divisor, divisor /= 10, charPrinted++)
 	{
-		digit = num / order;
-		num -= (digit * order);
-		_putchar(digit + '0');
-		moreCharsPrinted++;
+		resp = n / divisor;
+		_putchar('0' + resp);
 	}
-	return (moreCharsPrinted);
+	return (charPrinted);
 }
 
 /**
- * print_binary - converts unsigned int argument to binary
- * and print it to stdout
- * @toBin: th unsigned int in base 10 to be converted and
- * printed to stdout
- *
- * Return: The no of binary digits printed to stdout
+ * print_STR - prints a string with a `S` (upper case) specificer
+ * @arg: argument
+ * Return: number of character printed
  */
-int print_binary(va_list toBin)
+
+int print_STR(va_list arg)
 {
-	int var1, var2, baseNum, modValue, moreCharsPrinted;
-	int binArr[50];
+	int i;
+	char *str = va_arg(arg, char*);
 
-	var1 = 0;
-	baseNum = va_arg(toBin, int);
+	if (str == NULL)
+		str = "(null)";
+	else if (*str == '\0')
+		return (-1);
 
-	while (baseNum != 0)
+	for (i = 0; str[i]; i++)
 	{
-		modValue = baseNum % 2;
-		baseNum /= 2;
-		binArr[var1] = modValue;
-		var1++;
+		if ((str[i] < 32 && str[i] > 0) || str[i] >= 127)
+		{
+			_putchar('\\');
+			_putchar('x');
+			if (i < 16)
+				_putchar('0');
+			print_unsignedIntToHex(str[i], 'A');
+		}
+		else
+		{
+			_putchar(str[i]);
+		}
 	}
-	for (var2 = var1 - 1; var2 >= 0; var2--)
+	return (i);
+}
+
+/**
+ * print_str - prints a string with a `s` (lower case) specifier
+ * @arg: argument
+ * Return: number of character printed
+ */
+
+int print_str(va_list arg)
+{
+	int i;
+	char *str = va_arg(arg, char*);
+
+	if (str == NULL)
+		str = "(null)";
+	else if (*str == '\0')
+		return (-1);
+
+	for (i = 0; str[i]; i++)
+		_putchar(str[i]);
+
+	return (i);
+}
+
+/**
+ * print_unsigned - prints an unsigned int.
+ * @arg: argument
+ * Return: 0
+ */
+
+int print_unsigned(va_list arg)
+{
+	int divisor = 1, i, resp;
+	unsigned int n = va_arg(arg, unsigned int);
+
+	for (i = 0; n / divisor > 9; i++, divisor *= 10)
 	{
-		_putchar('0' + binArr[var2]);
-		moreCharsPrinted++;
 	}
-	return (moreCharsPrinted);
+
+	for (; divisor >= 1; n %= divisor, divisor /= 10)
+	{
+		resp = n / divisor;
+		_putchar('0' + resp);
+	}
+	return (i + 1);
 }

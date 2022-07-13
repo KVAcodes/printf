@@ -1,76 +1,90 @@
-#include <stdio.h>
-#include <stdarg.h>
-#include <stdlib.h>
 #include "main.h"
+#include <stdlib.h>
+#include <stdio.h>
+
 /**
- * funcIdentifier - this function takes in a conversion specifier
- * and returns the corresponding print_* function to be used
- * @checkSpec: a character proceeding the % symbol to be checked
- * if its a conv specifier character listed in the array match
- *
- * Return: returns a function pointer or NULL if the checkSpec char
- * isn't among the list of conversion specifiers in the match array
+ * printIdentifiers - prints special characters
+ * @next: character after the %
+ * @arg: argument for the indentifier
+ * Return: the number of characters printed
+ * (excluding the null byte used to end output to strings)
  */
-int (*funcIdentifier(char checkSpec))(va_list)
+
+int printIdentifiers(char next, va_list arg)
 {
-	int var1;
-	match matcharr[] = {
-				{'c', print_char},
-				{'s', print_string},
-				{'d', print_int},
-				{'i', print_int},
-				{'b', print_binary}
-				};
-	for (var1 = 0; var1 < 5; var1++)
+	int functsIndex;
+
+	identifierStruct functs[] = {
+					{"c", print_char},
+					{"s", print_str},
+					{"d", print_int},
+					{"i", print_int},
+					{"u", print_unsigned},
+					{"b", print_unsignedToBinary},
+					{"o", print_oct},
+					{"x", print_hex},
+					{"X", print_HEX},
+					{"S", print_STR},
+					{NULL, NULL}
+					};
+
+	for (functsIndex = 0; functs[functsIndex].indentifier != NULL; functsIndex++)
 	{
-		if (matcharr[var1].convSpec == checkSpec)
-		{
-			return (matcharr[var1].funcPtr);
-		}
+		if (functs[functsIndex].indentifier[0] == next)
+			return (functs[functsIndex].printer(arg));
 	}
-	return (NULL);
+	return (0);
 }
 
 /**
- * _printf - produces output according to a format
- * @format: format is a character string which consists of one
- * or more directives
+ * _printf - mimic printf from stdio
+ * Description: produces output according to a format
+ * write output to stdout, the standard output stream
+ * @format: character string composed of zero or more directives
  *
- * Return: The number of characters printed (excluding the null
- * byte used to end output to strings)
+ * Return: the number of characters printer
+ * (excluding the null byte used to end output to strings)
+ * return -1 for incomplete identifier error
  */
+
 int _printf(const char *format, ...)
 {
-	int var1, var2, charsPrinted;
-	int (*printSubFunction)(va_list);
-	va_list args;
+	unsigned int i;
+	int identifierPrinted = 0, charPrinted = 0;
+	va_list arg;
 
-	charsPrinted = 0;
-	va_start(args, format);
-	for (var1 = 0; format[var1] != 0; var1++)
+	va_start(arg, format);
+	if (format == NULL)
+		return (-1);
+
+	for (i = 0; format[i] != '\0'; i++)
 	{
-		if (format[var1] != '%' && format[var1 - 1] != '%')
+		if (format[i] != '%')
 		{
-			_putchar(format[var1]);
-			charsPrinted++;
+			_putchar(format[i]);
+			charPrinted++;
 			continue;
 		}
-		if (format[var1] == '%')
+		if (format[i + 1] == '%')
 		{
-			printSubFunction = funcIdentifier(format[var1 + 1]);
-			if (printSubFunction != NULL)
-			{
-			var2 = printSubFunction(args);
-			charsPrinted += var2;
-			}
-		}
-		if (format[var1 - 1] == '%' && printSubFunction == NULL)
-		{
-			_putchar(format[var1]);
-			charsPrinted++;
+			_putchar('%');
+			charPrinted++;
+			i++;
 			continue;
+		}
+		if (format[i + 1] == '\0')
+			return (-1);
+		identifierPrinted = printIdentifiers(format[i + 1], arg);
+		if (identifierPrinted == -1 || identifierPrinted != 0)
+			i++;
+		if (identifierPrinted > 0)
+			charPrinted += identifierPrinted;
+		if (identifierPrinted == 0)
+		{
+			_putchar('%');
+			charPrinted++;
 		}
 	}
-	va_end(args);
-	return (charsPrinted);
+	va_end(arg);
+	return (charPrinted);
 }
