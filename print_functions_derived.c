@@ -49,7 +49,7 @@ int print_oct(va_list arg)
 	for (i = 0; i < j && octa[i] == '0'; i++)
 	{
 	}
-	for (; i < j; i++)												
+	for (; i < j; i++)
 	{
 		_putchar(octa[i]);
 		charPrinted++;
